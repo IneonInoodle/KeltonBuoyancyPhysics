@@ -82,10 +82,12 @@ void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterM
 void UUnderWaterMeshGenerator::ModifyMesh(UStaticMeshComponent* Comp)
 {
 	MeshTransform = Comp->GetComponentTransform();
-
+	UE_LOG(LogTemp, Warning, TEXT("ModifiyMesh"));
 	if (!GetStaticMeshVertexLocationsAndTriangles(Comp, MeshVerticesGlobal, MeshVertices, MeshTriangles)) {
 		UE_LOG(LogTemp,Warning,TEXT("Getting Vertices and Triangle Failed!!! Bad"));
 	}
+
+	AllDistancesToWater.Init(0, MeshVertices.Num());
 }
 
 void UUnderWaterMeshGenerator::AddTriangles()

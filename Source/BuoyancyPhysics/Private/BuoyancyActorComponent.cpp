@@ -71,7 +71,10 @@ void UBuoyancyActorComponent::InitVariables()
 {	
 	ParentMesh = GetOwner()->FindComponentByClass<UStaticMeshComponent>()->GetStaticMesh();
 	ParentPrimitive = GetOwner()->FindComponentByClass<UPrimitiveComponent>();
+	
 	UnderWaterMeshGenerator = NewObject<UUnderWaterMeshGenerator>();
+	
+	UnderWaterMeshGenerator->ModifyMesh(GetOwner()->FindComponentByClass<UStaticMeshComponent>());
 }
 
 void UBuoyancyActorComponent::AddUnderWaterForces()
