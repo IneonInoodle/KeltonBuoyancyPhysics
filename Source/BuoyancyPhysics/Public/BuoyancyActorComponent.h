@@ -33,7 +33,7 @@ public:
 
 private:
 
-	void InitVariables();
+	
 
 	UStaticMesh* ParentMesh;
 	UPrimitiveComponent* ParentPrimitive;
@@ -49,5 +49,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* mesh;
 
+	void InitVariables();
+	void AddUnderWaterForces();
 	void CreateTriangle();	
 };

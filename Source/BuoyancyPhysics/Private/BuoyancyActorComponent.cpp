@@ -4,6 +4,7 @@
 #include "BuoyancyActorComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "UnderWaterMeshGenerator.h"
+#include "Private/KismetTraceUtils.h"
 
 // Sets default values for this component's properties
 UBuoyancyActorComponent::UBuoyancyActorComponent()
@@ -22,6 +23,8 @@ void UBuoyancyActorComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InitVariables();
+
 	// ...
 	
 }
@@ -34,9 +37,21 @@ void UBuoyancyActorComponent::TickComponent(float DeltaTime, ELevelTick TickType
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	UnderWaterMeshGenerator->GenerateUnderWaterMesh();
+
+	//for debugging
+	UnderWaterMeshGenerator->DisplayMesh();
 
 
-	// ...
+	//NOTE!!!! Unreal doesnt have a fixed time step like unity, physics should actually be implemented by creating one https://forums.unrealengine.com/community/community-content-tools-and-tutorials/87505-using-a-fixed-physics-timestep-in-unreal-engine-free-the-physics-approach
+	// in this case I did the lazy thing and just ignore this for now. But really should do 
+
+	////Add forces to the part of the boat that's below the water -- TODO ADD TO FIXED TIMESTEP
+	if (UnderWaterMeshGenerator->UnderWaterTriangleData.Num() > 0)
+	{
+		AddUnderWaterForces();
+	}
+
 }
 
 
@@ -45,7 +60,7 @@ void UBuoyancyActorComponent::PostLoad()
 {
 	Super::PostLoad();
 
-	InitVariables();
+
 	CreateTriangle();
 	UE_LOG(LogTemp, Warning, TEXT("PostLoad"));
 }
@@ -56,6 +71,49 @@ void UBuoyancyActorComponent::InitVariables()
 	ParentMesh = GetOwner()->FindComponentByClass<UStaticMeshComponent>()->GetStaticMesh();
 	ParentPrimitive = GetOwner()->FindComponentByClass<UPrimitiveComponent>();
 	UnderWaterMeshGenerator = NewObject<UUnderWaterMeshGenerator>();
+}
+
+void UBuoyancyActorComponent::AddUnderWaterForces()
+{
+	//Get all triangles
+	TArray<FTriangleData> underWaterTriangleData = UnderWaterMeshGenerator->UnderWaterTriangleData;
+
+	for (int i = 0; i < underWaterTriangleData.Num(); i++)
+	{
+		//This triangle
+		FTriangleData triangleData = underWaterTriangleData[i];
+
+		//Calculate the buoyancy force
+		FVector buoyancyForce = BuoyancyForce(WaterDensity, triangleData);
+
+		//Add the force to the boat
+		ParentPrimitive->AddForceAtLocation(buoyancyForce, triangleData.center);
+
+
+		//Debug
+
+	
+		//Normal
+		DrawDebugLine(
+			GetWorld(),
+			triangleData.center,
+			triangleData.center + triangleData.normal * 3.0f,
+			FColor::Green,
+			false, -1, 0,
+			12.333
+		);
+
+		//Buoyancy
+
+		DrawDebugLine(
+			GetWorld(),
+			triangleData.center,
+			triangleData.center + buoyancyForce.Normalize() * -3.0f,
+			FColor::Blue,
+			false, -1, 0,
+			12.333
+		);
+	}
 }
 
 void UBuoyancyActorComponent::CreateTriangle()

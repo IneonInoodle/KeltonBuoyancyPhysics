@@ -7,6 +7,8 @@
 #include "Engine/World.h"
 #include "UnderWaterMeshGenerator.generated.h"
 
+class UStaticMeshComponent;
+
 /**
  * 
  */
@@ -41,24 +43,39 @@ struct FTriangleData
 		center = (p1 + p2 + p3) / 3.0f;
 		
 		//float MyTime = GetWorld()->GetTimeSeconds(); 
+
 		//Distance to the surface from the center of the triangle
-		//distanceToSurface = FMath.Abs(WaterController.current.DistanceToWater(this.center, Time.time));
+		distanceToSurface = FVector::Distance(FVector::ZeroVector, center);
 
 		//Normal to the triangle
 		normal = FVector::CrossProduct(p2 - p1, p3 - p1);
 		normal.Normalize();
 
+		// formula to get angle between two vectors found here https://www.jofre.de/?page_id=1297#item6
+		float angle = FMath::Atan2(FVector::CrossProduct(p2 - p1, p3 - p1).Normalize(), FVector::DotProduct(p2 - p1, p3 - p1));
+
 		//Area of the triangle
 		float a = FVector::Distance(p1, p2);
-
-		float c = FVector::Distance(p3, p1);
-		
-		// formula to get angle between two vectors found here https://www.jofre.de/?page_id=1297#item6
-		float angle = FMath::Atan2(FVector::CrossProduct(p2 - p1, p3 - p1).Normalize(), FVector::DotProduct(p2 - p1, p3 - p1));		
+		float c = FVector::Distance(p3, p1);	
 		area = (a * c * FMath::Sin(FMath::RadiansToDegrees(angle))) / 2.0f;
 	}
-
 	FTriangleData() {}
+};
+
+//Helper struct to store triangle data so we can sort the distances
+USTRUCT(BlueprintType)
+struct FVertexData
+{
+	GENERATED_BODY()
+	//The distance to water from this vertex
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VertexData")
+	float distance;
+	//An index so we can form clockwise triangles
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VertexData")
+	int index;
+	//The global Vector3 position of the vertex
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VertexData")
+	FVector globalVertexPos;
 };
 
 UCLASS()
@@ -67,7 +84,24 @@ class BUOYANCYPHYSICS_API UUnderWaterMeshGenerator : public UObject
 	GENERATED_BODY()
 
 public:
+	TArray<FVector> MeshVerticesGlobal;
+	TArray<FTriangleData> UnderWaterTriangleData;
+
 	void GenerateUnderWaterMesh();
 	void DisplayMesh();
-	
+	void ModifyMesh(UStaticMeshComponent* Comp);
+private:
+
+	FTransform MeshTransform;
+	TArray<int> MeshTriangles;
+	TArray<FVector> MeshVertices;
+	TArray<float> AllDistancesToWater;
+
+	void AddTriangles();
+	void AddTrianglesOneAboveWater(TArray<FVertexData> vertexData);
+	void AddTrianglesTwoAboveWater(TArray<FVertexData> vertexData);
+
+	//some relavant info found here https://wiki.unrealengine.com/Accessing_mesh_triangles_and_vertex_positions_in_build
+	bool GetStaticMeshVertexLocationsAndTriangles(UStaticMeshComponent* Comp, TArray<FVector>& GlobalVertexPositions, TArray<FVector>& LocalVertexPositions, TArray<int>& TriangleIndexes);
+
 };
