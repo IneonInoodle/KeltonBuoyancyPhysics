@@ -8,6 +8,7 @@
 #include "UnderWaterMeshGenerator.generated.h"
 
 class UStaticMeshComponent;
+class UProceduralMeshComponent;
 
 /**
  * 
@@ -88,7 +89,7 @@ public:
 	TArray<FTriangleData> UnderWaterTriangleData;
 
 	void GenerateUnderWaterMesh();
-	void DisplayMesh();
+	void DisplayMesh(UProceduralMeshComponent* UnderWaterMesh, TArray<FTriangleData> triangleData);
 	void ModifyMesh(UStaticMeshComponent* Comp);
 private:
 

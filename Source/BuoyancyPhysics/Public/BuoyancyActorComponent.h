@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "ProceduralMeshComponent.h"
+#include "UnderWaterMeshGenerator.h"
 #include "BuoyancyActorComponent.generated.h"
 
 class UStaticMesh;
@@ -51,5 +52,7 @@ private:
 
 	void InitVariables();
 	void AddUnderWaterForces();
+
+	FVector BuoyancyForce(float rho, FTriangleData triangleData);
 	void CreateTriangle();	
 };

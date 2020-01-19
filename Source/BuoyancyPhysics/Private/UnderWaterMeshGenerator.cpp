@@ -8,26 +8,67 @@
 #include "PhysicsEngine/BodySetup.h"
 #include "PhysXPublicCore.h"
 #include "PxSimpleTypes.h"
+#include "ProceduralMeshComponent.h"
 
 
 void UUnderWaterMeshGenerator::GenerateUnderWaterMesh()
 {	
-	
-
 	//get distance to water
 	for (int i = 0; i < MeshVertices.Num(); i++) {
-		//TODO
+
+		//The coordinate should be in global position
+		FVector globalPos = MeshTransform.TransformPosition(MeshVertices[i]);
+
+		//Save the global position so we only need to calculate it once here
+		//And if we want to debug we can convert it back to local
+		MeshVerticesGlobal[i] = globalPos;
+
+		AllDistancesToWater[i] = FVector::Distance(globalPos, FVector(globalPos.X, globalPos.Y, 0));
 	}
-
-
+	
 	// get triangles below water
 	UnderWaterTriangleData.Empty();
 	AddTriangles();
 }
 
-void UUnderWaterMeshGenerator::DisplayMesh()
-{
+void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterMesh, TArray<FTriangleData> triangleData)
+{	
 	
+	TArray<FVector> vertices;
+	TArray<int> triangles;
+	TArray<FVector> normals;
+	//Build the mesh
+	for (int i = 0; i < triangleData.Num(); i++)
+	{	
+		
+		//From global coordinates to local coordinates
+		FVector p1 = MeshTransform.InverseTransformPosition(triangleData[i].p1);
+		FVector p2 = MeshTransform.InverseTransformPosition(triangleData[i].p2);
+		FVector p3 = MeshTransform.InverseTransformPosition(triangleData[i].p3);
+
+
+		normals.Add((triangleData[i].normal));
+		vertices.Add(p1);
+		triangles.Add(vertices.Num() - 1);
+
+		normals.Add((triangleData[i].normal));
+		vertices.Add(p2);
+		triangles.Add(vertices.Num() - 1);
+
+		normals.Add((triangleData[i].normal));
+		vertices.Add(p3);
+		triangles.Add(vertices.Num() - 1);
+
+	}
+
+	
+	//Remove the old mesh
+	UnderWaterMesh->ClearAllMeshSections();
+
+
+	UnderWaterMesh->CreateMeshSection(0, vertices, triangles, normals, TArray<FVector2D>(), TArray<FColor>(), TArray<FProcMeshTangent>(), false);
+
+	//UnderWaterMesh->CreateMeshSection_LinearColor(0, vertices, triangles, normals, TArray<FVector2D>(), TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 }
 
 void UUnderWaterMeshGenerator::ModifyMesh(UStaticMeshComponent* Comp)

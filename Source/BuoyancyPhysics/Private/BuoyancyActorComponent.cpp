@@ -3,6 +3,7 @@
 
 #include "BuoyancyActorComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/World.h"
 #include "UnderWaterMeshGenerator.h"
 #include "Private/KismetTraceUtils.h"
 
@@ -40,9 +41,8 @@ void UBuoyancyActorComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	UnderWaterMeshGenerator->GenerateUnderWaterMesh();
 
 	//for debugging
-	UnderWaterMeshGenerator->DisplayMesh();
-
-
+	UnderWaterMeshGenerator->DisplayMesh(UnderWaterMesh, UnderWaterMeshGenerator->UnderWaterTriangleData);
+	
 	//NOTE!!!! Unreal doesnt have a fixed time step like unity, physics should actually be implemented by creating one https://forums.unrealengine.com/community/community-content-tools-and-tutorials/87505-using-a-fixed-physics-timestep-in-unreal-engine-free-the-physics-approach
 	// in this case I did the lazy thing and just ignore this for now. But really should do 
 
@@ -61,7 +61,7 @@ void UBuoyancyActorComponent::PostLoad()
 	Super::PostLoad();
 
 
-	CreateTriangle();
+	//CreateTriangle();
 	UE_LOG(LogTemp, Warning, TEXT("PostLoad"));
 }
 
@@ -116,6 +116,30 @@ void UBuoyancyActorComponent::AddUnderWaterForces()
 	}
 }
 
+// found here https://www.habrador.com/tutorials/unity-boat-tutorial/3-buoyancy/
+FVector UBuoyancyActorComponent::BuoyancyForce(float rho, FTriangleData triangleData)
+{
+	//Buoyancy is a hydrostatic force - it's there even if the water isn't flowing or if the boat stays still
+
+			// F_buoyancy = rho * g * V
+			// rho - density of the mediaum you are in
+			// g - gravity
+			// V - volume of fluid directly above the curved surface 
+
+			// V = z * S * n 
+			// z - distance to surface
+			// S - surface area
+			// n - normal to the surface
+	
+	FVector buoyancyForce = rho * GetWorld()->GetGravityZ() * triangleData.distanceToSurface * triangleData.area * triangleData.normal;
+
+	//The vertical component of the hydrostatic forces don't cancel out but the horizontal do
+	buoyancyForce.X = 0.0f;
+	buoyancyForce.Y = 0.0f;
+
+	return buoyancyForce;
+}
+
 void UBuoyancyActorComponent::CreateTriangle()
 {
 	TArray<FVector> vertices;
@@ -152,6 +176,6 @@ void UBuoyancyActorComponent::CreateTriangle()
 	mesh->CreateMeshSection_LinearColor(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
 
 	// Enable collision data
-	mesh->ContainsPhysicsTriMeshData(true);
+	mesh->ContainsPhysicsTriMeshData(false);
 }
 
