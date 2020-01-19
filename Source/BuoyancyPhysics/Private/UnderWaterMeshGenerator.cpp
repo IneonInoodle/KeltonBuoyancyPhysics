@@ -22,13 +22,15 @@ void UUnderWaterMeshGenerator::GenerateUnderWaterMesh()
 	for (int32 i = 0; i < MeshVertices.Num(); i++) {
 
 		//The coordinate should be in global position
-		FVector globalPos = MeshTransform.TransformPosition(MeshVertices[i]);
+		FVector globalPos = ParentMesh->GetComponentTransform().TransformPosition(MeshVertices[i]);
 
 		//Save the global position so we only need to calculate it once here
 		//And if we want to debug we can convert it back to local
 		MeshVerticesGlobal[i] = globalPos;
-
 		AllDistancesToWater[i] = globalPos.Z - 0;
+
+		UE_LOG(LogTemp, Warning, TEXT("transform %s"), *ParentMesh->GetComponentTransform().ToString());
+		UE_LOG(LogTemp, Warning, TEXT("%f"), AllDistancesToWater[i]);
 	}
 
 	AddTriangles();
@@ -44,9 +46,9 @@ void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterM
 	{	
 		
 		//From global coordinates to local coordinates
-		FVector p1 = MeshTransform.InverseTransformPosition(triangleData[i].p1);
-		FVector p2 = MeshTransform.InverseTransformPosition(triangleData[i].p2);
-		FVector p3 = MeshTransform.InverseTransformPosition(triangleData[i].p3);
+		FVector p1 = ParentMesh->GetComponentTransform().InverseTransformPosition(triangleData[i].p1);
+		FVector p2 = ParentMesh->GetComponentTransform().InverseTransformPosition(triangleData[i].p2);
+		FVector p3 = ParentMesh->GetComponentTransform().InverseTransformPosition(triangleData[i].p3);
 
 
 		normals.Add((triangleData[i].normal));
@@ -79,7 +81,8 @@ void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterM
 }
 
 void UUnderWaterMeshGenerator::ModifyMesh(UStaticMeshComponent* Comp)
-{
+{	
+	ParentMesh = Comp;
 	MeshTransform = Comp->GetComponentTransform();
 	//UE_LOG(LogTemp, Warning, TEXT("ModifiyMesh"));
 	if (!GetStaticMeshVertexLocationsAndTriangles(Comp, MeshVerticesGlobal, MeshVertices, MeshTriangles)) {
@@ -105,7 +108,7 @@ void UUnderWaterMeshGenerator::AddTriangles()
 	
 	while (i < MeshTriangles.Num())
 	{	
-		UE_LOG(LogTemp, Warning, TEXT("%d    %d"), MeshTriangles.Num(), i);
+		//UE_LOG(LogTemp, Warning, TEXT("%d    %d"), MeshTriangles.Num(), i);
 		//Loop through the 3 vertices
 		for (int32 x = 0; x < 3; x++)
 		{
@@ -119,7 +122,7 @@ void UUnderWaterMeshGenerator::AddTriangles()
 			vertexData[x].globalVertexPos = MeshVerticesGlobal[MeshTriangles[i]];
 
 			float f = AllDistancesToWater[MeshTriangles[i]];
-			UE_LOG(LogTemp, Warning, TEXT("Distance to water %f"), f);
+			//UE_LOG(LogTemp, Warning, TEXT("Distance to water %f"), f);
 
 			i++;
 		}

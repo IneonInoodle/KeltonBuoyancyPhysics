@@ -93,6 +93,7 @@ public:
 	void ModifyMesh(UStaticMeshComponent* Comp);
 private:
 
+	UStaticMeshComponent* ParentMesh;
 	FTransform MeshTransform;
 	TArray<int> MeshTriangles;
 	TArray<FVector> MeshVertices;
