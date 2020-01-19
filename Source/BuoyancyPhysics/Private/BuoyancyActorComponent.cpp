@@ -103,8 +103,8 @@ void UBuoyancyActorComponent::AddUnderWaterForces()
 			triangleData.center,
 			triangleData.center + triangleData.normal * 3.0f,
 			FColor::Green,
-			false, -1, 0,
-			12.333
+			false, -1, 2,
+			1
 		);
 
 		//Buoyancy
@@ -113,9 +113,9 @@ void UBuoyancyActorComponent::AddUnderWaterForces()
 			GetWorld(),
 			triangleData.center,
 			triangleData.center + buoyancyForce.Normalize() * -3.0f,
-			FColor::Blue,
+			FColor::Red,
 			false, -1, 0,
-			12.333
+			1
 		);
 	}
 }
