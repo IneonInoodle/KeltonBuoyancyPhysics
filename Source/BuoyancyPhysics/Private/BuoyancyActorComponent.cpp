@@ -41,7 +41,7 @@ void UBuoyancyActorComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	UnderWaterMeshGenerator->GenerateUnderWaterMesh();
 
 	//for debugging
-	UnderWaterMeshGenerator->DisplayMesh(UnderWaterMesh, UnderWaterMeshGenerator->UnderWaterTriangleData);
+	//UnderWaterMeshGenerator->DisplayMesh(UnderWaterMesh, UnderWaterMeshGenerator->UnderWaterTriangleData);
 	
 	//NOTE!!!! Unreal doesnt have a fixed time step like unity, physics should actually be implemented by creating one https://forums.unrealengine.com/community/community-content-tools-and-tutorials/87505-using-a-fixed-physics-timestep-in-unreal-engine-free-the-physics-approach
 	// in this case I did the lazy thing and just ignore this for now. But really should do 
@@ -49,7 +49,7 @@ void UBuoyancyActorComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	////Add forces to the part of the boat that's below the water -- TODO ADD TO FIXED TIMESTEP
 	if (UnderWaterMeshGenerator->UnderWaterTriangleData.Num() > 0)
 	{	
-		UE_LOG(LogTemp, Warning, TEXT("Addforces"));
+		//UE_LOG(LogTemp, Warning, TEXT("Addforces"));
 		AddUnderWaterForces();
 	}
 
@@ -91,13 +91,15 @@ void UBuoyancyActorComponent::AddUnderWaterForces()
 		FVector buoyancyForce = BuoyancyForce(WaterDensity, triangleData);
 
 		//Add the force to the boat
-		ParentPrimitive->AddForceAtLocation(buoyancyForce, triangleData.center);
+		//ParentPrimitive->AddForceAtLocation(buoyancyForce, triangleData.center);
 
 
 		//Debug
 
 	
 		//Normal
+
+		/*
 		DrawDebugLine(
 			GetWorld(),
 			triangleData.center,
@@ -105,6 +107,14 @@ void UBuoyancyActorComponent::AddUnderWaterForces()
 			FColor::Green,
 			false, -1, 2,
 			1
+		);*/
+
+		DrawDebugPoint(
+			GetWorld(),
+			triangleData.center,
+			10.0f,
+			FColor::Purple,
+			false, -1, 2	
 		);
 
 		//Buoyancy

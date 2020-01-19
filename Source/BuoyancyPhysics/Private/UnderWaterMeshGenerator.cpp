@@ -14,12 +14,12 @@
 void UUnderWaterMeshGenerator::GenerateUnderWaterMesh()
 {	
 
-	UE_LOG(LogTemp, Warning, TEXT("GeneratUnderWaterMesh"));
+	//UE_LOG(LogTemp, Warning, TEXT("GeneratUnderWaterMesh"));
 	// get triangles below water
 	UnderWaterTriangleData.Empty();
 
 	//get distance to water
-	for (int i = 0; i < MeshVertices.Num(); i++) {
+	for (int32 i = 0; i < MeshVertices.Num(); i++) {
 
 		//The coordinate should be in global position
 		FVector globalPos = MeshTransform.TransformPosition(MeshVertices[i]);
@@ -40,7 +40,7 @@ void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterM
 	TArray<int32> triangles;
 	TArray<FVector> normals;
 	//Build the mesh
-	for (int i = 0; i < triangleData.Num(); i++)
+	for (int32 i = 0; i < triangleData.Num(); i++)
 	{	
 		
 		//From global coordinates to local coordinates
@@ -81,12 +81,12 @@ void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterM
 void UUnderWaterMeshGenerator::ModifyMesh(UStaticMeshComponent* Comp)
 {
 	MeshTransform = Comp->GetComponentTransform();
-	UE_LOG(LogTemp, Warning, TEXT("ModifiyMesh"));
+	//UE_LOG(LogTemp, Warning, TEXT("ModifiyMesh"));
 	if (!GetStaticMeshVertexLocationsAndTriangles(Comp, MeshVerticesGlobal, MeshVertices, MeshTriangles)) {
-		UE_LOG(LogTemp,Warning,TEXT("Getting Vertices and Triangle Failed!!! Bad"));
+		//UE_LOG(LogTemp,Warning,TEXT("Getting Vertices and Triangle Failed!!! Bad"));
 	}
 
-	AllDistancesToWater.Init(0, MeshVertices.Num());
+	AllDistancesToWater.Init(0, MeshVertices.Num() + 1);
 }
 
 void UUnderWaterMeshGenerator::AddTriangles()
@@ -99,23 +99,27 @@ void UUnderWaterMeshGenerator::AddTriangles()
 	vertexData.Add(FVertexData());
 	vertexData.Add(FVertexData());
 
-	UE_LOG(LogTemp, Warning, TEXT("Addtrias"));
+	//UE_LOG(LogTemp, Warning, TEXT("Addtrias"));
 	//Loop through all the triangles (3 vertices at a time = 1 triangle)
-	int i = 0;
+	int32 i = 0;
+	
 	while (i < MeshTriangles.Num())
 	{	
-		
+		UE_LOG(LogTemp, Warning, TEXT("%d    %d"), MeshTriangles.Num(), i);
 		//Loop through the 3 vertices
-		for (int x = 0; x < 3; x++)
+		for (int32 x = 0; x < 3; x++)
 		{
 			//Save the data we need
-			float f = AllDistancesToWater[MeshTriangles[i]];
-			UE_LOG(LogTemp, Warning, TEXT("Distance to water %f"),f);
+
+			//
 			vertexData[x].distance = AllDistancesToWater[MeshTriangles[i]];
 
 			vertexData[x].index = x;
 
 			vertexData[x].globalVertexPos = MeshVerticesGlobal[MeshTriangles[i]];
+
+			float f = AllDistancesToWater[MeshTriangles[i]];
+			UE_LOG(LogTemp, Warning, TEXT("Distance to water %f"), f);
 
 			i++;
 		}
@@ -124,7 +128,7 @@ void UUnderWaterMeshGenerator::AddTriangles()
 		//All vertices are above the water
 		if (vertexData[0].distance > 0.0f && vertexData[1].distance > 0.0f && vertexData[2].distance > 0.0f)
 		{	
-			UE_LOG(LogTemp, Warning, TEXT("Addtrias 1"));
+			//UE_LOG(LogTemp, Warning, TEXT("Addtrias 1"));
 			continue;
 		}
 
@@ -134,7 +138,7 @@ void UUnderWaterMeshGenerator::AddTriangles()
 		//All vertices are underwater
 		if (vertexData[0].distance < 0.0f && vertexData[1].distance < 0.0f && vertexData[2].distance < 0.0f)
 		{	
-			UE_LOG(LogTemp, Warning, TEXT("Addtrias 2"));
+			//UE_LOG(LogTemp, Warning, TEXT("Addtrias 2"));
 			FVector p1 = vertexData[0].globalVertexPos;
 			FVector p2 = vertexData[1].globalVertexPos;
 			FVector p3 = vertexData[2].globalVertexPos;
@@ -154,14 +158,14 @@ void UUnderWaterMeshGenerator::AddTriangles()
 			if (vertexData[0].distance > 0.0f && vertexData[1].distance < 0.0f && vertexData[2].distance < 0.0f)
 			{	
 
-				UE_LOG(LogTemp, Warning, TEXT("Addtrias 3"));
+				//UE_LOG(LogTemp, Warning, TEXT("Addtrias 3"));
 				AddTrianglesOneAboveWater(vertexData);
 			}
 			//Two vertices are above the water, the other is below
 			else if (vertexData[0].distance > 0.0f && vertexData[1].distance > 0.0f && vertexData[2].distance < 0.0f)
 			{	
 
-				UE_LOG(LogTemp, Warning, TEXT("Addtrias 4"));
+				//UE_LOG(LogTemp, Warning, TEXT("Addtrias 4"));
 				AddTrianglesTwoAboveWater(vertexData);
 			}
 		}
@@ -318,11 +322,6 @@ bool UUnderWaterMeshGenerator::GetStaticMeshVertexLocationsAndTriangles(UStaticM
 	{
 		return false;
 	}
-
-	//clear arrays
-	GlobalVertexPositions.Empty();
-	LocalVertexPositions.Empty();
-	TriangleIndexes.Empty();
 
 	//Component Transform
 	FTransform RV_Transform = Comp->GetComponentTransform();
