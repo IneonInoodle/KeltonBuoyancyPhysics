@@ -48,7 +48,8 @@ void UBuoyancyActorComponent::TickComponent(float DeltaTime, ELevelTick TickType
 
 	////Add forces to the part of the boat that's below the water -- TODO ADD TO FIXED TIMESTEP
 	if (UnderWaterMeshGenerator->UnderWaterTriangleData.Num() > 0)
-	{
+	{	
+		UE_LOG(LogTemp, Warning, TEXT("Addforces"));
 		AddUnderWaterForces();
 	}
 
