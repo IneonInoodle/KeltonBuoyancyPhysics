@@ -148,12 +148,12 @@ void UUnderWaterMeshGenerator::AddTriangles()
 		if (vertexData[0].distance < 0.0f && vertexData[1].distance < 0.0f && vertexData[2].distance < 0.0f)
 		{	
 			//UE_LOG(LogTemp, Warning, TEXT("Addtrias 2"));
-			FVector p1 = vertexData[2].globalVertexPos;
+			FVector p1 = vertexData[0].globalVertexPos;
 			FVector p2 = vertexData[1].globalVertexPos;
-			FVector p3 = vertexData[0].globalVertexPos;
+			FVector p3 = vertexData[2].globalVertexPos;
 
-			//Save the triangle
-			UnderWaterTriangleData.Add(FTriangleData(p1, p2, p3));
+			//Save the triangle in reverse order (unreal counter clockwise for some dumb reason)
+			UnderWaterTriangleData.Add(FTriangleData(p3, p2, p1));
 		}
 		//1 or 2 vertices are below the water
 		else
@@ -246,9 +246,11 @@ void UUnderWaterMeshGenerator::AddTrianglesOneAboveWater(TArray<FVertexData> ver
 
 
 	//Save the data, such as normal, area, etc      
-	//2 triangles below the water  
-	UnderWaterTriangleData.Add(FTriangleData(M, I_M, I_L));
-	UnderWaterTriangleData.Add(FTriangleData(M, I_L, L));
+	//2 triangles below the water
+
+	//Save the triangle in reverse order (unreal counter clockwise for some dumb reason)
+	UnderWaterTriangleData.Add(FTriangleData(I_L, I_M, M));
+	UnderWaterTriangleData.Add(FTriangleData(L, I_L, M));
 }
 
 void UUnderWaterMeshGenerator::AddTrianglesTwoAboveWater(TArray<FVertexData> vertexData)
@@ -316,8 +318,8 @@ void UUnderWaterMeshGenerator::AddTrianglesTwoAboveWater(TArray<FVertexData> ver
 
 
 	//Save the data, such as normal, area, etc
-	//1 triangle below the water
-	UnderWaterTriangleData.Add(FTriangleData(L, J_H, J_M));
+	//1 triangle below the water, reverse oder because unreal is dumb
+	UnderWaterTriangleData.Add(FTriangleData(J_M, J_H, L));
 }
 
 bool UUnderWaterMeshGenerator::GetStaticMeshVertexLocationsAndTriangles(UStaticMeshComponent* Comp, TArray<FVector>& GlobalVertexPositions, TArray<FVector>& LocalVertexPositions, TArray<int>& TriangleIndexes)
