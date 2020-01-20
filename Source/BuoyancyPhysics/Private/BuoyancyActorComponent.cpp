@@ -100,11 +100,12 @@ void UBuoyancyActorComponent::AddUnderWaterForces()
 	
 		//Normal
 
+		UE_LOG(LogTemp, Warning, TEXT("triangle data %s"), *triangleData.normal.ToString());
 		
 		DrawDebugLine(
 			GetWorld(),
 			triangleData.center,
-			triangleData.center - triangleData.normal * 3.0f,
+			triangleData.center + triangleData.normal * 3.0f,
 			FColor::Green,
 			false, -1, 2,
 			1

@@ -69,7 +69,7 @@ void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterM
 
 	if (UnderWaterMesh) {
 		UnderWaterMesh->ClearAllMeshSections();
-		UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, TArray<FVector2D>(), OUT normals, OUT tangents);
+		//UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, TArray<FVector2D>(), OUT normals, OUT tangents);
 		UnderWaterMesh->CreateMeshSection_LinearColor(0, vertices, triangles, normals, TArray<FVector2D>(), TArray<FLinearColor>(), TArray<FProcMeshTangent>(), false);
 		
 	}
