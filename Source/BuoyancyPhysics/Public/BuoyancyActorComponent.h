@@ -31,30 +31,30 @@ public:
 
 	//TEST VARS These should go in a global water controller class
 	//Force 2 - Pressure Drag Force
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar Pressure Drag Force")
 	float velocityReference;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar Pressure Drag Force")
 	float C_PD1 = 10.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar Pressure Drag Force")
 	float C_PD2 = 10.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar Pressure Drag Force")
 	float f_P = 0.1f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar Suction Drag")
 	float C_SD1 = 1.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar Suction Drag")
 	float C_SD2 = 1.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar Suction Drag")
 	float f_S = 0.05f;
 
 	//Force 3 - Slamming Force
 	//Power used to ramp up slamming force
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar Slamming Force")
 	float p = 2.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar Slamming Force")
 	float acc_max = 0.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar Slamming Force")
 	float slammingCheat;
 
 	UPROPERTY(VisibleAnywhere)

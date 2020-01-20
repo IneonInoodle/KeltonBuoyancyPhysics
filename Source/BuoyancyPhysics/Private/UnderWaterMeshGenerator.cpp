@@ -32,7 +32,7 @@ void UUnderWaterMeshGenerator::GenerateUnderWaterMesh()
 
 	int tt = MeshVertices.Num();
 
-	UE_LOG(LogTemp, Warning, TEXT("%d"), tt);
+	//UE_LOG(LogTemp, Warning, TEXT("%d"), tt);
 	//get distance to water
 	for (int32 i = 0; i < MeshVertices.Num(); i++) {
 
@@ -423,7 +423,7 @@ float UUnderWaterMeshGenerator::CalculateUnderWaterLength()
 	//Approximate the length as the length of the underwater mesh
 	float underWaterLength = underWaterMesh->Bounds.BoxExtent.Y;
 
-	UE_LOG(LogTemp, Warning, TEXT("%f ApproxLength"), underWaterLength);
+	//UE_LOG(LogTemp, Warning, TEXT("%f ApproxLength"), underWaterLength);
 
 	return underWaterLength;
 }
