@@ -17,10 +17,9 @@ UBuoyancyActorComponent::UBuoyancyActorComponent()
 
 	mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("GeneratedMesh"));
 	UnderWaterMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("UnderwaterMesh"));
-	AboveWaterMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("UnderwaterMesh"));
+	AboveWaterMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("AbovewaterMesh"));
 	// ...
 }
-
 
 // Called when the game starts
 void UBuoyancyActorComponent::BeginPlay()
@@ -28,9 +27,7 @@ void UBuoyancyActorComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InitVariables();
-
 	// ...
-	
 }
 
 
@@ -55,7 +52,7 @@ void UBuoyancyActorComponent::TickComponent(float DeltaTime, ELevelTick TickType
 		AddUnderWaterForces();
 	}
 
-	if (UnderWaterMeshGenerator->AboveWaterTriangleData.Num() > 0)
+	if (UnderWaterMeshGenerator->aboveWaterTriangleData.Num() > 0)
 	{
 		AddAboveWaterForces();
 	}
@@ -70,7 +67,7 @@ void UBuoyancyActorComponent::InitVariables()
 	
 	UnderWaterMeshGenerator = NewObject<UUnderWaterMeshGenerator>();
 	
-	UnderWaterMeshGenerator->ModifyMesh(GetOwner()->FindComponentByClass<UStaticMeshComponent>());
+	UnderWaterMeshGenerator->ModifyMesh(GetOwner()->FindComponentByClass<UStaticMeshComponent>(),ParentPrimitive,UnderWaterMesh);
 	//shift center of mass
 	ParentPrimitive->SetCenterOfMass(CenterOfMass);
 }
@@ -154,7 +151,7 @@ void UBuoyancyActorComponent::AddUnderWaterForces()
 		DrawDebugLine(
 			GetWorld(),
 			triangleData.center,
-			triangleData.center + buoyancyForce.Normalize() * -3.0f,
+			triangleData.center + forceToAdd.Normalize() * -3.0f,
 			FColor::Red,
 			false, -1, 0,
 			1
@@ -179,7 +176,7 @@ void UBuoyancyActorComponent::AddAboveWaterForces()
 		//Force 1 - Air resistance 
 		//Replace VisbyData.C_r with your boat's drag coefficient
 		//TODO add variable for drag coefficent
-		forceToAdd += AirResistanceForce(AirDensity, triangleData, 1.0f);
+		forceToAdd += AirResistanceForce(AirDensity, triangleData, 0.002f);
 
 		//Add the forces to the boat
 		ParentPrimitive->AddForceAtLocation(forceToAdd, triangleData.center);
@@ -327,9 +324,9 @@ FVector UBuoyancyActorComponent::SlammingForce(FSlammingForceData slammingData, 
 
 	   //Add slamming if the normal is in the same direction as the velocity (the triangle is not receding from the water)
 	   //Also make sure thea area is not 0, which it sometimes is for some reason
-	if (triangleData.cosTheta < 0f || slammingData.originalArea <= 0.0f)
+	if (triangleData.cosTheta < 0.0f || slammingData.originalArea <= 0.0f)
 	{
-		return FVector::Zero;
+		return FVector::ZeroVector;
 	}
 
 	
@@ -367,8 +364,6 @@ FVector UBuoyancyActorComponent::SlammingForce(FSlammingForceData slammingData, 
 
 	float acc_max = acc;
 
-	float slammingCheat = DebugPhysics.current.slammingCheat;
-
 	FVector slammingForce = FMath::Pow(FMath::Clamp(acc / acc_max,0.0f,1.0f), p) * triangleData.cosTheta * F_stop * slammingCheat;
 
 	//Vector3 slammingForce = Vector3.zero;
@@ -394,13 +389,13 @@ FVector UBuoyancyActorComponent::AirResistanceForce(float rho, FTriangleData tri
 	   // C_r - coefficient of air resistance (drag coefficient)
 
 	   //Only add air resistance if normal is pointing in the same direction as the velocity
-	if (triangleData.cosTheta < 0f)
+	if (triangleData.cosTheta < 0.0f)
 	{
 		return FVector::ZeroVector;
 	}
 
 	//Find air resistance force
-	FVector airResistanceForce = 0.5f * rho * triangleData.velocity.magnitude * triangleData.velocity * triangleData.area * C_air;
+	FVector airResistanceForce = 0.5f * rho * triangleData.velocity.Size() * triangleData.velocity * triangleData.area * C_air;
 
 	//Acting in the opposite side of the velocity
 	airResistanceForce *= -1.0f;
@@ -450,11 +445,6 @@ FVector UBuoyancyActorComponent::PressureDragForce(FTriangleData triangleData)
 		//float C_PD2 = 10f;
 		//float f_P = 0.5f;
 
-		//To change the variables real-time - add the finished values later
-		float C_PD1 = DebugPhysics.current.C_PD1;
-		float C_PD2 = DebugPhysics.current.C_PD2;
-		float f_P = DebugPhysics.current.f_P;
-
 		pressureDragForce = -(C_PD1 * velocity + C_PD2 * (velocity * velocity)) * triangleData.area * FMath::Pow(triangleData.cosTheta, f_P) * triangleData.normal;
 	}
 	else
@@ -463,12 +453,7 @@ FVector UBuoyancyActorComponent::PressureDragForce(FTriangleData triangleData)
 		//float C_SD2 = 10f;
 		//float f_S = 0.5f;
 
-		//To change the variables real-time - add the finished values later
-		float C_SD1 = DebugPhysics.current.C_SD1;
-		float C_SD2 = DebugPhysics.current.C_SD2;
-		float f_S = DebugPhysics.current.f_S;
-
-		pressureDragForce = (C_SD1 * velocity + C_SD2 * (velocity * velocity)) * triangleData.area * FMath::Pow(Mathf.Abs(triangleData.cosTheta), f_S) * triangleData.normal;
+		pressureDragForce = (C_SD1 * velocity + C_SD2 * (velocity * velocity)) * triangleData.area * FMath::Pow(FMath::Abs(triangleData.cosTheta), f_S) * triangleData.normal;
 	}
 
 	pressureDragForce = CheckForceIsValid(pressureDragForce, "Pressure drag");

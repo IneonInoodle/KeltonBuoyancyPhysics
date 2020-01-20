@@ -28,9 +28,11 @@ void UUnderWaterMeshGenerator::GenerateUnderWaterMesh()
 	indexOfOriginalTriangle.Empty();
 
 	//Make sure we find the distance to water with the same time
-	timeSinceStart = GetWorld()->TimeSeconds;
+	//timeSinceStart = GetWorld()->GetTimeSeconds();
 
+	int tt = MeshVertices.Num();
 
+	UE_LOG(LogTemp, Warning, TEXT("%d"), tt);
 	//get distance to water
 	for (int32 i = 0; i < MeshVertices.Num(); i++) {
 
@@ -161,7 +163,7 @@ void UUnderWaterMeshGenerator::AddTriangles()
 			//Save the triangle
 			aboveWaterTriangleData.Add(FTriangleData(p3, p2, p1, ParentPrim));
 
-			slammingForceData[triangleCounter].submergedArea = 0f;
+			slammingForceData[triangleCounter].submergedArea = 0.0f;
 
 			continue;
 		}
@@ -208,7 +210,7 @@ void UUnderWaterMeshGenerator::AddTriangles()
 	}
 }
 
-void UUnderWaterMeshGenerator::AddTrianglesOneAboveWater(TArray<FVertexData> vertexData, triangleCounter)
+void UUnderWaterMeshGenerator::AddTrianglesOneAboveWater(TArray<FVertexData> vertexData, int32 triangleCounter)
 {
 	//H is always at position 0
 	FVector H = vertexData[0].globalVertexPos;
@@ -296,7 +298,7 @@ void UUnderWaterMeshGenerator::AddTrianglesOneAboveWater(TArray<FVertexData> ver
 
 }
 
-void UUnderWaterMeshGenerator::AddTrianglesTwoAboveWater(TArray<FVertexData> vertexData)
+void UUnderWaterMeshGenerator::AddTrianglesTwoAboveWater(TArray<FVertexData> vertexData, int32 triangleCounter)
 {
 	//H and M are above the water
 	//H is after the vertice that's below water, which is L
@@ -367,7 +369,7 @@ void UUnderWaterMeshGenerator::AddTrianglesTwoAboveWater(TArray<FVertexData> ver
 
 	//2 triangles below the water
 	aboveWaterTriangleData.Add(FTriangleData(J_M, H, J_H, ParentPrim));
-	aboveWaterTriangleData.Add(new TriangleData(M, H, J_M, ParentPrim));
+	aboveWaterTriangleData.Add(FTriangleData(M, H, J_M, ParentPrim));
 
 	//Calculate the submerged area
 	slammingForceData[triangleCounter].submergedArea = GetTriangleArea(J_M, J_H, L);

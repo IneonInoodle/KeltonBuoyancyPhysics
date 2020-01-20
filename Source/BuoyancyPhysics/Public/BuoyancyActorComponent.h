@@ -17,7 +17,7 @@ class BUOYANCYPHYSICS_API UBuoyancyActorComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UBuoyancyActorComponent();
 
@@ -25,12 +25,41 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void PostLoad();
-	
+	//TEST VARS These should go in a global water controller class
+	//Force 2 - Pressure Drag Force
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float velocityReference;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float C_PD1 = 10.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float C_PD2 = 10.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float f_P = 0.5f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float C_SD1 = 10.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float C_SD2 = 10.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float f_S = 0.5f;
+
+	//Force 3 - Slamming Force
+
+	//Power used to ramp up slamming force
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float p = 2.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float acc_max = 10.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float slammingCheat;
+
+
+
 	UPROPERTY(VisibleAnywhere)
 	UUnderWaterMeshGenerator* UnderWaterMeshGenerator;
 	UPROPERTY(VisibleAnywhere)
@@ -52,7 +81,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	float WaterDensity = 1.0f;
 	UPROPERTY(VisibleAnywhere)
-	float AirDensity = 0.001f;
+	float AirDensity = 0.0001f;
 
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* mesh;

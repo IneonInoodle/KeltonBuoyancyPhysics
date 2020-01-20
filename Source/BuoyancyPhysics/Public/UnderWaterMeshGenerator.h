@@ -166,6 +166,7 @@ public:
 	void GenerateUnderWaterMesh();
 	void DisplayMesh(UProceduralMeshComponent* UnderWaterMesh, TArray<FTriangleData> triangleData);
 	void ModifyMesh(UStaticMeshComponent* Comp, UPrimitiveComponent* Prim, UProceduralMeshComponent* pmc);
+	float CalculateUnderWaterLength();
 private:
 
 	UPROPERTY(VisibleAnywhere)
@@ -185,10 +186,10 @@ private:
 	TArray<float> AllDistancesToWater;
 
 	void AddTriangles();
-	void AddTrianglesOneAboveWater(TArray<FVertexData> vertexData);
-	void AddTrianglesTwoAboveWater(TArray<FVertexData> vertexData);
+	void AddTrianglesOneAboveWater(TArray<FVertexData> vertexData, int32 triangleCounter);
+	void AddTrianglesTwoAboveWater(TArray<FVertexData> vertexData, int32 triangleCounter);
 	void CalculateOriginalTrianglesArea();
-	float CalculateUnderWaterLength();
+
 	//some relavant info found here https://wiki.unrealengine.com/Accessing_mesh_triangles_and_vertex_positions_in_build
 	bool GetStaticMeshVertexLocationsAndTriangles(UStaticMeshComponent* Comp, TArray<FVector>& GlobalVertexPositions, TArray<FVector>& LocalVertexPositions, TArray<int>& TriangleIndexes);
 	
