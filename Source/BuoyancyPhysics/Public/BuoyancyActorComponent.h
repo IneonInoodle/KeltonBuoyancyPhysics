@@ -34,31 +34,28 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
 	float velocityReference;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
 	float C_PD1 = 10.0f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
 	float C_PD2 = 10.0f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
-	float f_P = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float f_P = 0.1f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
-	float C_SD1 = 10.0f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
-	float C_SD2 = 10.0f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
-	float f_S = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float C_SD1 = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float C_SD2 = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float f_S = 0.05f;
 
 	//Force 3 - Slamming Force
-
 	//Power used to ramp up slamming force
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
 	float p = 2.0f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
-	float acc_max = 10.0f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
+	float acc_max = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WaterVar")
 	float slammingCheat;
-
-
 
 	UPROPERTY(VisibleAnywhere)
 	UUnderWaterMeshGenerator* UnderWaterMeshGenerator;
