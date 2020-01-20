@@ -14,8 +14,6 @@
 
 void UUnderWaterMeshGenerator::GenerateUnderWaterMesh()
 {	
-
-	//UE_LOG(LogTemp, Warning, TEXT("GeneratUnderWaterMesh"));
 	// get triangles below water
 	UnderWaterTriangleData.Empty();
 
@@ -29,9 +27,6 @@ void UUnderWaterMeshGenerator::GenerateUnderWaterMesh()
 		//And if we want to debug we can convert it back to local
 		MeshVerticesGlobal[i] = globalPos;
 		AllDistancesToWater[i] = globalPos.Z - 0;
-
-		//UE_LOG(LogTemp, Warning, TEXT("transform %s"), *ParentMesh->GetComponentTransform().ToString());
-		//UE_LOG(LogTemp, Warning, TEXT("%f"), AllDistancesToWater[i]);
 	}
 
 	AddTriangles();
@@ -62,7 +57,6 @@ void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterM
 		triangles.Add(vertices.Num() - 1);
 
 		normals.Add(-(triangleData[i].normal));
-		//UE_LOG(LogTemp, Warning, TEXT("%s"), *triangleData[i].normal.ToString())
 		vertices.Add(p3);
 		triangles.Add(vertices.Num() - 1);
 	}
@@ -90,9 +84,7 @@ void UUnderWaterMeshGenerator::ModifyMesh(UStaticMeshComponent* Comp)
 {	
 	ParentMesh = Comp;
 	MeshTransform = Comp->GetComponentTransform();
-	//UE_LOG(LogTemp, Warning, TEXT("ModifiyMesh"));
 	if (!GetStaticMeshVertexLocationsAndTriangles(Comp, MeshVerticesGlobal, MeshVertices, MeshTriangles)) {
-		//UE_LOG(LogTemp,Warning,TEXT("Getting Vertices and Triangle Failed!!! Bad"));
 	}
 
 	AllDistancesToWater.Init(0, MeshVertices.Num() + 1);
@@ -108,13 +100,11 @@ void UUnderWaterMeshGenerator::AddTriangles()
 	vertexData.Add(FVertexData());
 	vertexData.Add(FVertexData());
 
-	//UE_LOG(LogTemp, Warning, TEXT("Addtrias"));
 	//Loop through all the triangles (3 vertices at a time = 1 triangle)
 	int32 i = 0;
 	
 	while (i < MeshTriangles.Num())
 	{	
-		//UE_LOG(LogTemp, Warning, TEXT("%d    %d"), MeshTriangles.Num(), i);
 		//Loop through the 3 vertices
 		for (int32 x = 0; x < 3; x++)
 		{
@@ -128,8 +118,6 @@ void UUnderWaterMeshGenerator::AddTriangles()
 			vertexData[x].globalVertexPos = MeshVerticesGlobal[MeshTriangles[i]];
 
 			float f = AllDistancesToWater[MeshTriangles[i]];
-			//UE_LOG(LogTemp, Warning, TEXT("Distance to water %f"), f);
-
 			i++;
 		}
 
@@ -137,7 +125,6 @@ void UUnderWaterMeshGenerator::AddTriangles()
 		//All vertices are above the water
 		if (vertexData[0].distance > 0.0f && vertexData[1].distance > 0.0f && vertexData[2].distance > 0.0f)
 		{	
-			//UE_LOG(LogTemp, Warning, TEXT("Addtrias 1"));
 			continue;
 		}
 
@@ -147,7 +134,6 @@ void UUnderWaterMeshGenerator::AddTriangles()
 		//All vertices are underwater
 		if (vertexData[0].distance < 0.0f && vertexData[1].distance < 0.0f && vertexData[2].distance < 0.0f)
 		{	
-			//UE_LOG(LogTemp, Warning, TEXT("Addtrias 2"));
 			FVector p1 = vertexData[0].globalVertexPos;
 			FVector p2 = vertexData[1].globalVertexPos;
 			FVector p3 = vertexData[2].globalVertexPos;
@@ -166,15 +152,12 @@ void UUnderWaterMeshGenerator::AddTriangles()
 			//One vertice is above the water, the rest is below
 			if (vertexData[0].distance > 0.0f && vertexData[1].distance < 0.0f && vertexData[2].distance < 0.0f)
 			{	
-
-				//UE_LOG(LogTemp, Warning, TEXT("Addtrias 3"));
 				AddTrianglesOneAboveWater(vertexData);
 			}
 			//Two vertices are above the water, the other is below
 			else if (vertexData[0].distance > 0.0f && vertexData[1].distance > 0.0f && vertexData[2].distance < 0.0f)
 			{	
 
-				//UE_LOG(LogTemp, Warning, TEXT("Addtrias 4"));
 				AddTrianglesTwoAboveWater(vertexData);
 			}
 		}
