@@ -73,7 +73,7 @@ private:
 	FVector PressureDragForce(FTriangleData triangleData);
 	FVector SlammingForce(FSlammingForceData slammingData, FTriangleData triangleData, float boatArea, float boatMass);
 	FVector AirResistanceForce(float rho, FTriangleData triangleData, float C_air);
-	void CalculateSlammingVelocities(TArray<FSlammingForceData> slammingForceData)
+	void CalculateSlammingVelocities(TArray<FSlammingForceData> slammingForceData);
 
 
 };

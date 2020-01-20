@@ -410,6 +410,21 @@ FVector UBuoyancyActorComponent::AirResistanceForce(float rho, FTriangleData tri
 	return airResistanceForce;
 }
 
+void UBuoyancyActorComponent::CalculateSlammingVelocities(TArray<FSlammingForceData> slammingForceData)
+{
+	for (int32 i = 0; i < slammingForceData.Num(); i++)
+	{
+		//Set the new velocity to the old velocity
+		slammingForceData[i].previousVelocity = slammingForceData[i].velocity;
+
+		//Center of the triangle in world space
+		FVector center = GetOwner()->GetTransform().TransformPosition(slammingForceData[i].triangleCenter);
+
+		//Get the current velocity at the center of the triangle
+		slammingForceData[i].velocity = GetTriangleVelocity(ParentPrimitive, center);
+	}
+}
+
 // found here as well https://www.habrador.com/tutorials/unity-boat-tutorial/5-resistance-forces/
 FVector UBuoyancyActorComponent::PressureDragForce(FTriangleData triangleData)
 {

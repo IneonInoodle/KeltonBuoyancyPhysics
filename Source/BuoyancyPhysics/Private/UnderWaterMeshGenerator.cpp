@@ -16,6 +16,20 @@ void UUnderWaterMeshGenerator::GenerateUnderWaterMesh()
 {	
 	// get triangles below water
 	UnderWaterTriangleData.Empty();
+	aboveWaterTriangleData.Empty();
+
+
+	//Switch the submerged triangle area with the one in the previous time step
+	for (int32 j = 0; j < slammingForceData.Num(); j++)
+	{
+		slammingForceData[j].previousSubmergedArea = slammingForceData[j].submergedArea;
+	}
+
+	indexOfOriginalTriangle.Empty();
+
+	//Make sure we find the distance to water with the same time
+	timeSinceStart = GetWorld()->TimeSeconds;
+
 
 	//get distance to water
 	for (int32 i = 0; i < MeshVertices.Num(); i++) {
@@ -28,9 +42,10 @@ void UUnderWaterMeshGenerator::GenerateUnderWaterMesh()
 		MeshVerticesGlobal[i] = globalPos;
 		AllDistancesToWater[i] = globalPos.Z - 0;
 	}
-
 	AddTriangles();
 }
+
+
 
 void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterMesh, TArray<FTriangleData> triangleData)
 {	
@@ -80,14 +95,27 @@ void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterM
 	//UnderWaterMesh->CreateMeshSection_LinearColor(0, vertices, triangles, normals, TArray<FVector2D>(), TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 }
 
-void UUnderWaterMeshGenerator::ModifyMesh(UStaticMeshComponent* Comp)
+void UUnderWaterMeshGenerator::ModifyMesh(UStaticMeshComponent* Comp, UPrimitiveComponent* Prim, UProceduralMeshComponent* pmc)
 {	
+	ParentPrim = Prim;
 	ParentMesh = Comp;
+	underWaterMesh = pmc;
+
 	MeshTransform = Comp->GetComponentTransform();
 	if (!GetStaticMeshVertexLocationsAndTriangles(Comp, MeshVerticesGlobal, MeshVertices, MeshTriangles)) {
 	}
 
 	AllDistancesToWater.Init(0, MeshVertices.Num() + 1);
+
+	//Setup the slamming force data
+	for (int32 i = 0; i < (MeshTriangles.Num() / 3); i++)
+	{
+		slammingForceData.Add(FSlammingForceData());
+	}
+
+	//Calculate the area of the original triangles and the total area of the entire boat
+	CalculateOriginalTrianglesArea();
+
 }
 
 void UUnderWaterMeshGenerator::AddTriangles()
@@ -102,7 +130,8 @@ void UUnderWaterMeshGenerator::AddTriangles()
 
 	//Loop through all the triangles (3 vertices at a time = 1 triangle)
 	int32 i = 0;
-	
+	int32 triangleCounter = 0;
+
 	while (i < MeshTriangles.Num())
 	{	
 		//Loop through the 3 vertices
@@ -117,7 +146,6 @@ void UUnderWaterMeshGenerator::AddTriangles()
 
 			vertexData[x].globalVertexPos = MeshVerticesGlobal[MeshTriangles[i]];
 
-			float f = AllDistancesToWater[MeshTriangles[i]];
 			i++;
 		}
 
@@ -125,6 +153,16 @@ void UUnderWaterMeshGenerator::AddTriangles()
 		//All vertices are above the water
 		if (vertexData[0].distance > 0.0f && vertexData[1].distance > 0.0f && vertexData[2].distance > 0.0f)
 		{	
+
+			FVector p1 = vertexData[0].globalVertexPos;
+			FVector p2 = vertexData[1].globalVertexPos;
+			FVector p3 = vertexData[2].globalVertexPos;
+
+			//Save the triangle
+			aboveWaterTriangleData.Add(FTriangleData(p3, p2, p1, ParentPrim));
+
+			slammingForceData[triangleCounter].submergedArea = 0f;
+
 			continue;
 		}
 
@@ -139,7 +177,12 @@ void UUnderWaterMeshGenerator::AddTriangles()
 			FVector p3 = vertexData[2].globalVertexPos;
 
 			//Save the triangle in reverse order (unreal counter clockwise for some dumb reason)
-			UnderWaterTriangleData.Add(FTriangleData(p3, p2, p1));
+			UnderWaterTriangleData.Add(FTriangleData(p3, p2, p1,ParentPrim));
+
+			//We have already calculated the area of this triangle
+			slammingForceData[triangleCounter].submergedArea = slammingForceData[triangleCounter].originalArea;
+
+			indexOfOriginalTriangle.Add(triangleCounter);
 		}
 		//1 or 2 vertices are below the water
 		else
@@ -152,19 +195,20 @@ void UUnderWaterMeshGenerator::AddTriangles()
 			//One vertice is above the water, the rest is below
 			if (vertexData[0].distance > 0.0f && vertexData[1].distance < 0.0f && vertexData[2].distance < 0.0f)
 			{	
-				AddTrianglesOneAboveWater(vertexData);
+				AddTrianglesOneAboveWater(vertexData, triangleCounter);
 			}
 			//Two vertices are above the water, the other is below
 			else if (vertexData[0].distance > 0.0f && vertexData[1].distance > 0.0f && vertexData[2].distance < 0.0f)
 			{	
 
-				AddTrianglesTwoAboveWater(vertexData);
+				AddTrianglesTwoAboveWater(vertexData, triangleCounter);
 			}
 		}
+		triangleCounter += 1;
 	}
 }
 
-void UUnderWaterMeshGenerator::AddTrianglesOneAboveWater(TArray<FVertexData> vertexData)
+void UUnderWaterMeshGenerator::AddTrianglesOneAboveWater(TArray<FVertexData> vertexData, triangleCounter)
 {
 	//H is always at position 0
 	FVector H = vertexData[0].globalVertexPos;
@@ -232,15 +276,31 @@ void UUnderWaterMeshGenerator::AddTrianglesOneAboveWater(TArray<FVertexData> ver
 	//2 triangles below the water
 
 	//Save the triangle in reverse order (unreal counter clockwise for some dumb reason)
-	UnderWaterTriangleData.Add(FTriangleData(I_L, I_M, M));
-	UnderWaterTriangleData.Add(FTriangleData(L, I_L, M));
+	UnderWaterTriangleData.Add(FTriangleData(I_L, I_M, M,ParentPrim));
+	UnderWaterTriangleData.Add(FTriangleData(L, I_L, M,ParentPrim));
+
+
+
+
+	//1 triangle above the water
+	aboveWaterTriangleData.Add(FTriangleData(I_L, H, I_M, ParentPrim));
+
+	//Calculate the total submerged area
+	float totalArea = GetTriangleArea(I_L, I_M, M) + GetTriangleArea(L, I_L, M);
+
+	slammingForceData[triangleCounter].submergedArea = totalArea;
+
+	indexOfOriginalTriangle.Add(triangleCounter);
+	//Add 2 times because 2 submerged triangles need to connect to the same original triangle
+	indexOfOriginalTriangle.Add(triangleCounter);
+
 }
 
 void UUnderWaterMeshGenerator::AddTrianglesTwoAboveWater(TArray<FVertexData> vertexData)
 {
 	//H and M are above the water
-			//H is after the vertice that's below water, which is L
-			//So we know which one is L because it is last in the sorted list
+	//H is after the vertice that's below water, which is L
+	//So we know which one is L because it is last in the sorted list
 	FVector L = vertexData[2].globalVertexPos;
 
 	//Find the index of H
@@ -302,7 +362,68 @@ void UUnderWaterMeshGenerator::AddTrianglesTwoAboveWater(TArray<FVertexData> ver
 
 	//Save the data, such as normal, area, etc
 	//1 triangle below the water, reverse oder because unreal is dumb
-	UnderWaterTriangleData.Add(FTriangleData(J_M, J_H, L));
+	UnderWaterTriangleData.Add(FTriangleData(J_M, J_H, L,ParentPrim));
+
+
+	//2 triangles below the water
+	aboveWaterTriangleData.Add(FTriangleData(J_M, H, J_H, ParentPrim));
+	aboveWaterTriangleData.Add(new TriangleData(M, H, J_M, ParentPrim));
+
+	//Calculate the submerged area
+	slammingForceData[triangleCounter].submergedArea = GetTriangleArea(J_M, J_H, L);
+
+	indexOfOriginalTriangle.Add(triangleCounter);
+
+}
+
+void UUnderWaterMeshGenerator::CalculateOriginalTrianglesArea()
+{
+	//Loop through all the triangles (3 vertices at a time = 1 triangle)
+	int i = 0;
+	int triangleCounter = 0;
+	while (i < MeshTriangles.Num())
+	{
+		FVector p1 = MeshVertices[MeshTriangles[i]];
+
+		i++;
+
+		FVector p2 = MeshVertices[MeshTriangles[i]];
+
+		i++;
+
+		FVector p3 = MeshVertices[MeshTriangles[i]];
+
+		i++;
+
+		//Calculate the area of the triangle
+		//Alternative 1 - Heron's formula
+		float a = FVector::Distance(p1, p2);
+		//float b = Vector3.Distance(vertice_2_pos, vertice_3_pos);
+		float c = FVector::Distance(p3, p1);
+
+		// formula to get angle between two vectors found here https://www.jofre.de/?page_id=1297#item6
+		float angle = FMath::Atan2(FVector::CrossProduct(p2 - p1, p3 - p1).Normalize(), FVector::DotProduct(p2 - p1, p3 - p1));
+		float triangleArea = (a * c * FMath::Sin(FMath::RadiansToDegrees(angle))) / 2.0f;
+
+		//Store the area in a list
+		slammingForceData[triangleCounter].originalArea = triangleArea;
+
+		//The total area
+		boatArea += triangleArea;
+
+		triangleCounter += 1;
+	}
+}
+
+float UUnderWaterMeshGenerator::CalculateUnderWaterLength()
+{
+	
+	//Approximate the length as the length of the underwater mesh
+	float underWaterLength = underWaterMesh->Bounds.BoxExtent.Y;
+
+	UE_LOG(LogTemp, Warning, TEXT("%f ApproxLength"), underWaterLength);
+
+	return underWaterLength;
 }
 
 bool UUnderWaterMeshGenerator::GetStaticMeshVertexLocationsAndTriangles(UStaticMeshComponent* Comp, TArray<FVector>& GlobalVertexPositions, TArray<FVector>& LocalVertexPositions, TArray<int>& TriangleIndexes)
@@ -384,5 +505,19 @@ bool UUnderWaterMeshGenerator::GetStaticMeshVertexLocationsAndTriangles(UStaticM
 	}
 
 	return true;
+}
+
+float UUnderWaterMeshGenerator::GetTriangleArea(FVector p1, FVector p2, FVector p3)
+{
+	//Alternative 1 - Heron's formula
+	float a = FVector::Distance(p1, p2);
+	//float b = Vector3.Distance(vertice_2_pos, vertice_3_pos);
+	float c = FVector::Distance(p3, p1);
+
+	// formula to get angle between two vectors found here https://www.jofre.de/?page_id=1297#item6
+	float angle = FMath::Atan2(FVector::CrossProduct(p2 - p1, p3 - p1).Normalize(), FVector::DotProduct(p2 - p1, p3 - p1));
+	float area = (a * c * FMath::Sin(FMath::RadiansToDegrees(angle))) / 2.0f;
+
+	return area;
 }
 
