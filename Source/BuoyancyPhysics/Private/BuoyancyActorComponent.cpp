@@ -134,7 +134,7 @@ void UBuoyancyActorComponent::AddUnderWaterForces()
 	}
 }
 
-// found here https://www.habrador.com/tutorials/unity-boat-tutorial/3-buoyancy/
+// found here formula found here https://www.habrador.com/tutorials/unity-boat-tutorial/3-buoyancy/
 FVector UBuoyancyActorComponent::BuoyancyForce(float rho, FTriangleData triangleData)
 {
 	//Buoyancy is a hydrostatic force - it's there even if the water isn't flowing or if the boat stays still
@@ -150,12 +150,12 @@ FVector UBuoyancyActorComponent::BuoyancyForce(float rho, FTriangleData triangle
 			// n - normal to the surface
 	
 	//
-	//rho = rho / 5000;
 
-	FVector buoyancyForce = rho * GetWorld()->GetGravityZ() * triangleData.distanceToSurface * triangleData.area * triangleData.normal;
 
 	UE_LOG(LogTemp, Warning, TEXT("Force %s, rho %f, gravity %f, distanceToSurface %f, triangle area %f, triangleDataNormal %s"), *buoyancyForce.ToString(), rho, GetWorld()->GetGravityZ(), triangleData.distanceToSurface, triangleData.area, *triangleData.normal.ToString());
-
+	
+	FVector buoyancyForce = rho * GetWorld()->GetGravityZ() * triangleData.distanceToSurface * triangleData.area * triangleData.normal;
+	
 	//The vertical component of the hydrostatic forces don't cancel out but the horizontal do
 	buoyancyForce.X = 0.0f;
 	buoyancyForce.Y = 0.0f;

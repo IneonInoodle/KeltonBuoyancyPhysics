@@ -42,7 +42,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UPrimitiveComponent* ParentPrimitive;
 
-	//Note RHO is normally 1000kg/m^3 
+	//Note RHO of water in real life is normally 1000kg/m^3 
 	UPROPERTY(VisibleAnywhere)
 	float WaterDensity = 1.0f;
 
