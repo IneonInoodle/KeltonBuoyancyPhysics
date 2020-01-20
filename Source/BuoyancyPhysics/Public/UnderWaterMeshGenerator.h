@@ -85,7 +85,9 @@ class BUOYANCYPHYSICS_API UUnderWaterMeshGenerator : public UObject
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(VisibleAnywhere)
 	TArray<FVector> MeshVerticesGlobal;
+	UPROPERTY(VisibleAnywhere)
 	TArray<FTriangleData> UnderWaterTriangleData;
 
 	void GenerateUnderWaterMesh();
@@ -93,10 +95,15 @@ public:
 	void ModifyMesh(UStaticMeshComponent* Comp);
 private:
 
+	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* ParentMesh;
+	UPROPERTY(VisibleAnywhere)
 	FTransform MeshTransform;
+	UPROPERTY(VisibleAnywhere)
 	TArray<int> MeshTriangles;
+	UPROPERTY(VisibleAnywhere)
 	TArray<FVector> MeshVertices;
+	UPROPERTY(VisibleAnywhere)
 	TArray<float> AllDistancesToWater;
 
 	void AddTriangles();

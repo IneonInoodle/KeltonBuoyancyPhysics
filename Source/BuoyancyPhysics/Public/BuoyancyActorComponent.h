@@ -31,18 +31,16 @@ public:
 
 	virtual void PostLoad();
 	
-
-private:
-
-	
-
-	UStaticMesh* ParentMesh;
-	UPrimitiveComponent* ParentPrimitive;
+	UPROPERTY(VisibleAnywhere)
 	UUnderWaterMeshGenerator* UnderWaterMeshGenerator;
-
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* UnderWaterMesh;
-
+private:
+	
+	UPROPERTY(VisibleAnywhere)
+	UStaticMesh* ParentMesh;
+	UPROPERTY(VisibleAnywhere)
+	UPrimitiveComponent* ParentPrimitive;
 	UPROPERTY(VisibleAnywhere)
 	float WaterDensity = 1025.0f;
 
