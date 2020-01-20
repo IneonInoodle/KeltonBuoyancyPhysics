@@ -49,8 +49,8 @@ struct FTriangleData
 		distanceToSurface = FVector::Distance(FVector::ZeroVector, center);
 
 		//Normal to the triangle
-		normal = FVector::CrossProduct(p3 - p1, p2 - p1);
-		//normal.Normalize();
+		normal = FVector::CrossProduct(p2 - p3, p1 - p3).GetClampedToSize(-1,1);
+		
 
 		// formula to get angle between two vectors found here https://www.jofre.de/?page_id=1297#item6
 		float angle = FMath::Atan2(FVector::CrossProduct(p2 - p1, p3 - p1).Normalize(), FVector::DotProduct(p2 - p1, p3 - p1));
