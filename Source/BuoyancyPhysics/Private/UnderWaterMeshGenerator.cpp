@@ -9,6 +9,7 @@
 #include "PhysXPublicCore.h"
 #include "PxSimpleTypes.h"
 #include "ProceduralMeshComponent.h"
+#include "KismetProceduralMeshLibrary.h"
 
 
 void UUnderWaterMeshGenerator::GenerateUnderWaterMesh()
@@ -41,6 +42,7 @@ void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterM
 	TArray<FVector> vertices;
 	TArray<int32> triangles;
 	TArray<FVector> normals;
+	TArray<FProcMeshTangent> tangents;
 	//Build the mesh
 	for (int32 i = 0; i < triangleData.Num(); i++)
 	{	
@@ -65,14 +67,18 @@ void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterM
 
 	}
 
-	
-	//Remove the old mesh
-	//UnderWaterMesh->ClearAllMeshSections();
+	if (UnderWaterMesh) {
+		UnderWaterMesh->ClearAllMeshSections();
+		//UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, TArray<FVector2D>(), OUT normals, OUT tangents);
+		UnderWaterMesh->CreateMeshSection_LinearColor(0, vertices, triangles, normals, TArray<FVector2D>(), TArray<FLinearColor>(), TArray<FProcMeshTangent>(), false);
+		
+	}
+		
 
 
 	//UnderWaterMesh->CreateMeshSection(0, vertices, triangles, normals,, TArray<FColor>(), TArray<FProcMeshTangent>(), false);
 
-	//UnderWaterMesh->CreateMeshSection_LinearColor(0, vertices, triangles, normals, TArray<FVector2D>(), TArray<FLinearColor>(), TArray<FProcMeshTangent>(), false);
+	
 
 	// Enable collision data
 	//UnderWaterMesh->ContainsPhysicsTriMeshData(false);

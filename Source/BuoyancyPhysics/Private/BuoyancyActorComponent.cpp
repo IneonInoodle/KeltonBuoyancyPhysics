@@ -15,6 +15,7 @@ UBuoyancyActorComponent::UBuoyancyActorComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("GeneratedMesh"));
+	UnderWaterMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("UnderwaterMesh"));
 	// ...
 }
 
@@ -41,7 +42,7 @@ void UBuoyancyActorComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	UnderWaterMeshGenerator->GenerateUnderWaterMesh();
 
 	//for debugging
-	//UnderWaterMeshGenerator->DisplayMesh(UnderWaterMesh, UnderWaterMeshGenerator->UnderWaterTriangleData);
+	UnderWaterMeshGenerator->DisplayMesh(UnderWaterMesh, UnderWaterMeshGenerator->UnderWaterTriangleData);
 	
 	//NOTE!!!! Unreal doesnt have a fixed time step like unity, physics should actually be implemented by creating one https://forums.unrealengine.com/community/community-content-tools-and-tutorials/87505-using-a-fixed-physics-timestep-in-unreal-engine-free-the-physics-approach
 	// in this case I did the lazy thing and just ignore this for now. But really should do 
