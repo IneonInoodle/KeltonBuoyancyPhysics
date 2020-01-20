@@ -100,23 +100,23 @@ void UBuoyancyActorComponent::AddUnderWaterForces()
 	
 		//Normal
 
-		/*
+		
 		DrawDebugLine(
 			GetWorld(),
 			triangleData.center,
-			triangleData.center + triangleData.normal * 3.0f,
+			triangleData.center - triangleData.normal * 3.0f,
 			FColor::Green,
 			false, -1, 2,
 			1
-		);*/
-
+		);
+		/*
 		DrawDebugPoint(
 			GetWorld(),
 			triangleData.center,
 			10.0f,
 			FColor::Purple,
 			false, -1, 2	
-		);
+		);*/
 
 		//Buoyancy
 

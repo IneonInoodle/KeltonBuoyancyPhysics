@@ -30,8 +30,8 @@ void UUnderWaterMeshGenerator::GenerateUnderWaterMesh()
 		MeshVerticesGlobal[i] = globalPos;
 		AllDistancesToWater[i] = globalPos.Z - 0;
 
-		UE_LOG(LogTemp, Warning, TEXT("transform %s"), *ParentMesh->GetComponentTransform().ToString());
-		UE_LOG(LogTemp, Warning, TEXT("%f"), AllDistancesToWater[i]);
+		//UE_LOG(LogTemp, Warning, TEXT("transform %s"), *ParentMesh->GetComponentTransform().ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("%f"), AllDistancesToWater[i]);
 	}
 
 	AddTriangles();
@@ -53,23 +53,23 @@ void UUnderWaterMeshGenerator::DisplayMesh(UProceduralMeshComponent* UnderWaterM
 		FVector p3 = ParentMesh->GetComponentTransform().InverseTransformPosition(triangleData[i].p3);
 
 
-		normals.Add((triangleData[i].normal));
+		normals.Add(-(triangleData[i].normal));
 		vertices.Add(p1);
 		triangles.Add(vertices.Num() - 1);
 
-		normals.Add((triangleData[i].normal));
+		normals.Add(-(triangleData[i].normal));
 		vertices.Add(p2);
 		triangles.Add(vertices.Num() - 1);
 
-		normals.Add((triangleData[i].normal));
+		normals.Add(-(triangleData[i].normal));
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *triangleData[i].normal.ToString())
 		vertices.Add(p3);
 		triangles.Add(vertices.Num() - 1);
-
 	}
 
 	if (UnderWaterMesh) {
 		UnderWaterMesh->ClearAllMeshSections();
-		//UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, TArray<FVector2D>(), OUT normals, OUT tangents);
+		UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, TArray<FVector2D>(), OUT normals, OUT tangents);
 		UnderWaterMesh->CreateMeshSection_LinearColor(0, vertices, triangles, normals, TArray<FVector2D>(), TArray<FLinearColor>(), TArray<FProcMeshTangent>(), false);
 		
 	}
@@ -148,9 +148,9 @@ void UUnderWaterMeshGenerator::AddTriangles()
 		if (vertexData[0].distance < 0.0f && vertexData[1].distance < 0.0f && vertexData[2].distance < 0.0f)
 		{	
 			//UE_LOG(LogTemp, Warning, TEXT("Addtrias 2"));
-			FVector p1 = vertexData[0].globalVertexPos;
+			FVector p1 = vertexData[2].globalVertexPos;
 			FVector p2 = vertexData[1].globalVertexPos;
-			FVector p3 = vertexData[2].globalVertexPos;
+			FVector p3 = vertexData[0].globalVertexPos;
 
 			//Save the triangle
 			UnderWaterTriangleData.Add(FTriangleData(p1, p2, p3));
@@ -159,7 +159,7 @@ void UUnderWaterMeshGenerator::AddTriangles()
 		else
 		{	
 			//Sort the vertices, may need to reverse this
-			vertexData.Sort([](const FVertexData& a, const FVertexData& b) { return a.distance < b.distance; });
+			vertexData.Sort([](const FVertexData& a, const FVertexData& b) { return a.distance > b.distance; });
 
 			//vertexData.Sort((const FVertexData x, const FVertexData y) = > x.distance.CompareTo(y.distance));
 
@@ -167,14 +167,14 @@ void UUnderWaterMeshGenerator::AddTriangles()
 			if (vertexData[0].distance > 0.0f && vertexData[1].distance < 0.0f && vertexData[2].distance < 0.0f)
 			{	
 
-				//UE_LOG(LogTemp, Warning, TEXT("Addtrias 3"));
+				UE_LOG(LogTemp, Warning, TEXT("Addtrias 3"));
 				AddTrianglesOneAboveWater(vertexData);
 			}
 			//Two vertices are above the water, the other is below
 			else if (vertexData[0].distance > 0.0f && vertexData[1].distance > 0.0f && vertexData[2].distance < 0.0f)
 			{	
 
-				//UE_LOG(LogTemp, Warning, TEXT("Addtrias 4"));
+				UE_LOG(LogTemp, Warning, TEXT("Addtrias 4"));
 				AddTrianglesTwoAboveWater(vertexData);
 			}
 		}
