@@ -91,8 +91,10 @@ void UBuoyancyActorComponent::AddUnderWaterForces()
 		//Calculate the buoyancy force
 		FVector buoyancyForce = BuoyancyForce(WaterDensity, triangleData);
 
+
+		UE_LOG(LogTemp, Warning, TEXT("AddForce"));
 		//Add the force to the boat
-		//ParentPrimitive->AddForceAtLocation(buoyancyForce, triangleData.center);
+		ParentPrimitive->AddForceAtLocation(buoyancyForce, triangleData.center);
 
 
 		//Debug
@@ -147,7 +149,12 @@ FVector UBuoyancyActorComponent::BuoyancyForce(float rho, FTriangleData triangle
 			// S - surface area
 			// n - normal to the surface
 	
+	//
+	//rho = rho / 5000;
+
 	FVector buoyancyForce = rho * GetWorld()->GetGravityZ() * triangleData.distanceToSurface * triangleData.area * triangleData.normal;
+
+	UE_LOG(LogTemp, Warning, TEXT("Force %s, rho %f, gravity %f, distanceToSurface %f, triangle area %f, triangleDataNormal %s"), *buoyancyForce.ToString(), rho, GetWorld()->GetGravityZ(), triangleData.distanceToSurface, triangleData.area, *triangleData.normal.ToString());
 
 	//The vertical component of the hydrostatic forces don't cancel out but the horizontal do
 	buoyancyForce.X = 0.0f;

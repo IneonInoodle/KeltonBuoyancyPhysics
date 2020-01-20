@@ -41,8 +41,10 @@ private:
 	UStaticMesh* ParentMesh;
 	UPROPERTY(VisibleAnywhere)
 	UPrimitiveComponent* ParentPrimitive;
+
+	//Note RHO is normally 1000kg/m^3 
 	UPROPERTY(VisibleAnywhere)
-	float WaterDensity = 1025.0f;
+	float WaterDensity = 1.0f;
 
 
 	UPROPERTY(VisibleAnywhere)

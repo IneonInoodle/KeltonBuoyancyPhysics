@@ -167,14 +167,14 @@ void UUnderWaterMeshGenerator::AddTriangles()
 			if (vertexData[0].distance > 0.0f && vertexData[1].distance < 0.0f && vertexData[2].distance < 0.0f)
 			{	
 
-				UE_LOG(LogTemp, Warning, TEXT("Addtrias 3"));
+				//UE_LOG(LogTemp, Warning, TEXT("Addtrias 3"));
 				AddTrianglesOneAboveWater(vertexData);
 			}
 			//Two vertices are above the water, the other is below
 			else if (vertexData[0].distance > 0.0f && vertexData[1].distance > 0.0f && vertexData[2].distance < 0.0f)
 			{	
 
-				UE_LOG(LogTemp, Warning, TEXT("Addtrias 4"));
+				//UE_LOG(LogTemp, Warning, TEXT("Addtrias 4"));
 				AddTrianglesTwoAboveWater(vertexData);
 			}
 		}
